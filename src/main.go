@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
+	pb "github.com/ArquitecturaDeSistemas/usermicroservice/tree/Backend/src/proto"
 	"github.com/tam210/model"
 	"github.com/tam210/repository"
-	pb "github.com/tam210/usermicroservice/proto"
 )
 
 type server struct {
