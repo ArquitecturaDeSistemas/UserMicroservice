@@ -6,6 +6,10 @@ option go_package = "github.com/ArquitecturaDeSistemas/usermicroservice/src/prot
 
 service UserService {
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  rpc GetUser (GetUserRequest) returns (GetUserResponse);
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
+  rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
 }
 
 message CreateUserRequest {
@@ -17,4 +21,51 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   string id = 1;
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  string id = 1;
+  string nombre = 2;
+  string apellido = 3;
+  string correo = 4;
+}
+
+message UpdateUserRequest {
+  string id = 1;
+  string nombre = 2;
+  string apellido = 3;
+  string correo = 4;
+}
+
+message UpdateUserResponse {
+  string id = 1;
+  string nombre = 2;
+  string apellido = 3;
+  string correo = 4;
+}
+
+message DeleteUserRequest {
+  string id = 1;
+}
+
+message DeleteUserResponse {
+  string mensaje = 1;
+}
+
+message ListUsersRequest {
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+}
+
+message User{
+  string id = 1;
+  string nombre = 2;
+  string apellido = 3;
+  string correo = 4;
 }

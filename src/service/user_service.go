@@ -37,12 +37,34 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	return response, nil
 }
 
-// func (s *UserService) Usuarios(ctx context.Context, req *pb.UsuariosRequest) (*pb.UsuariosResponse, error) {
-// 	usuarios, err := s.repo.Usuarios()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &pb.UsuariosResponse{Users: usuarios}, nil
-// }
+func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	u, err := s.repo.Usuario(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	response := &pb.GetUserResponse{
+		Id:       u.ID,
+		Nombre:   u.Nombre,
+		Apellido: u.Apellido,
+		Correo:   u.Correo,
+	}
+	return response, nil
+}
+func (s *UserService) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*pb.ListUsersResponse, error) {
+	users, err := s.repo.Usuarios()
+	if err != nil {
+		return nil, err
+	}
+	var response []*pb.User
+	for _, u := range users {
+		user := &pb.User{
+			Id:       u.ID,
+			Nombre:   u.Nombre,
+			Apellido: u.Apellido,
+			Correo:   u.Correo,
+		}
+		response = append(response, user)
+	}
 
-// ... otras funciones gRPC ...
+	return &pb.ListUsersResponse{Users: response}, nil
+}

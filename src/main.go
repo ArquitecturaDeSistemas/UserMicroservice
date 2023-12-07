@@ -22,6 +22,8 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepository)
 	// Configura el servidor gRPC
+	//este servidor está escuchando en el puerto 50051
+	//y se encarga de registrar el servicio de usuarios
 	grpcServe := grpc.NewServer()
 	// Registra el servicio de usuarios en el servidor gRPC
 	pb.RegisterUserServiceServer(grpcServe, userService)
@@ -32,7 +34,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-
 	fmt.Printf("Server listening on port %s...\n", port)
 
 	// Inicia el servidor gRPC en segundo plano
