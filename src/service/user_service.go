@@ -1,11 +1,12 @@
-package user
+package service
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/ArquitecturaDeSistemas/usermicroservice/model"
 	pb "github.com/ArquitecturaDeSistemas/usermicroservice/proto"
-	"github.com/tam210/model"
-	"github.com/tam210/repository"
+	"github.com/ArquitecturaDeSistemas/usermicroservice/repository"
 )
 
 type UserService struct {
@@ -29,15 +30,19 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.CreateUserResponse{User: u}, nil
+	fmt.Printf("Usuario creado: %v", u)
+	response := &pb.CreateUserResponse{
+		Id: u.ID,
+	}
+	return response, nil
 }
 
-func (s *UserService) Usuarios(ctx context.Context, req *pb.UsuariosRequest) (*pb.UsuariosResponse, error) {
-	usuarios, err := s.repo.Usuarios()
-	if err != nil {
-		return nil, err
-	}
-	return &pb.UsuariosResponse{Users: usuarios}, nil
-}
+// func (s *UserService) Usuarios(ctx context.Context, req *pb.UsuariosRequest) (*pb.UsuariosResponse, error) {
+// 	usuarios, err := s.repo.Usuarios()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &pb.UsuariosResponse{Users: usuarios}, nil
+// }
 
 // ... otras funciones gRPC ...

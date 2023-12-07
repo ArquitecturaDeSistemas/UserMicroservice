@@ -1,33 +1,54 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
-	pb "github.com/ArquitecturaDeSistemas/usermicroservice/tree/Backend/src/proto"
-	"github.com/tam210/model"
-	"github.com/tam210/repository"
+	"github.com/ArquitecturaDeSistemas/usermicroservice/database"
+	pb "github.com/ArquitecturaDeSistemas/usermicroservice/proto"
+	"github.com/ArquitecturaDeSistemas/usermicroservice/repository"
+	"github.com/ArquitecturaDeSistemas/usermicroservice/service"
+	"google.golang.org/grpc"
 )
 
-type server struct {
-	pb.UnimplementedUserMicroServiceServer
-	repo repository.UserRepository
-}
+func main() {
 
-func (s *server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	nuevoUsuario := model.CrearUsuarioInput{
-		Nombre:     req.GetNombre(),
-		Apellido:   req.GetApellido(),
-		Correo:     req.GetCorreo(),
-		Contrasena: req.GetContrasena(),
-	}
-	u, err := s.repo.CrearUsuario(nuevoUsuario)
+	db := database.Connect()
+	database.EjecutarMigraciones(db.GetConn())
+	userRepository := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepository)
+	// Configura el servidor gRPC
+	grpcServe := grpc.NewServer()
+	// Registra el servicio de usuarios en el servidor gRPC
+	pb.RegisterUserServiceServer(grpcServe, userService)
+
+	// Define el puerto en el que se ejecutará el servidor gRPC
+	port := "50051"
+	listen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
-		log.Printf("Error al crear usuario", err)
-		return nil, err
+		log.Fatalf("Failed to listen: %v", err)
 	}
-	response := &pb.CreateUserResponse{
-		Id: u.ID,
-	}
-	return response, nil
+
+	fmt.Printf("Server listening on port %s...\n", port)
+
+	// Inicia el servidor gRPC en segundo plano
+	go func() {
+		if err := grpcServe.Serve(listen); err != nil {
+			log.Fatalf("Failed to serve: %v", err)
+		}
+	}()
+
+	// Espera una señal para detener el servidor gRPC
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+	<-ch
+
+	fmt.Println("Shutting down the server...")
+
+	// Detén el servidor gRPC de manera segura
+	grpcServe.GracefulStop()
 }

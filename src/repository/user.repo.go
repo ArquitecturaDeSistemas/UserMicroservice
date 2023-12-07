@@ -8,9 +8,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ArquitecturaDeSistemas/usermicroservice/database"
+	"github.com/ArquitecturaDeSistemas/usermicroservice/model"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/tam210/database"
-	"github.com/tam210/model"
+
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -317,7 +318,7 @@ var jwtKey = []byte("clave_secreta")
 // Estructura del token
 type Claims struct {
 	UserID string `json:"user_id"`
-	Role   string `json:"role"`
+	//Role   string `json:"role"`
 	jwt.StandardClaims
 }
 
