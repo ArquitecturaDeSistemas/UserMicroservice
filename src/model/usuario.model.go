@@ -19,7 +19,6 @@ func (UsuarioGORM) TableName() string {
 }
 
 func (usuarioGORM *UsuarioGORM) ToGQL() (*Usuario, error) {
-	// Convierte las direcciones asociadas
 
 	return &Usuario{
 		ID:         strconv.Itoa(int(usuarioGORM.ID)),

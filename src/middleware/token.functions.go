@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/ArquitecturaDeSistemas/usermicroservice/model"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/tam210/model"
 )
 
 // Clave secreta que no se expone! es una clvve

@@ -8,16 +8,17 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ArquitecturaDeSistemas/usermicroservice/database"
+	"github.com/ArquitecturaDeSistemas/usermicroservice/model"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/tam210/database"
-	"github.com/tam210/model"
+
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
 	CrearUsuario(input model.CrearUsuarioInput) (*model.Usuario, error)
-	// Usuario(id string) (string, error)
+	Usuario(id string) (*model.Usuario, error)
 	// ActualizarUsuario(id string, input *model.ActualizarUsuarioInput) (string, error)
 	// EliminarUsuario(id string) (string, error)
 	Usuarios() ([]*model.Usuario, error)
@@ -84,26 +85,25 @@ func (ur *userRepository) Retrieve(correo string, contrasena string) (*model.Usu
 }
 
 // ObtenerTrabajo obtiene un trabajo por su ID.
-func (ur *userRepository) Usuario(id string) (string, error) {
+func (ur *userRepository) Usuario(id string) (*model.Usuario, error) {
 	var usuarioGORM model.UsuarioGORM
 	//result := ur.db.GetConn().First(&usuarioGORM, id)
-	result := ur.db.GetConn().Preload("Direcciones.Ciudad").First(&usuarioGORM, id)
+	result := ur.db.GetConn().First(&usuarioGORM, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return "No encontrado", result.Error
+			return nil, result.Error
 		}
 		log.Printf("Error al obtener el usuario con ID %s: %v", id, result.Error)
-		return "Error al obtener el usuario con ID", result.Error
+		return nil, result.Error
 	}
 
-	response, _ := usuarioGORM.ToGQL()
-	return ToJSON(response)
+	return usuarioGORM.ToGQL()
 }
 
 // Usuarios obtiene todos los usuarios de la base de datos.
 func (ur *userRepository) Usuarios() ([]*model.Usuario, error) {
 	var usuariosGORM []model.UsuarioGORM
-	result := ur.db.GetConn().Preload("Direcciones.Ciudad").Find(&usuariosGORM)
+	result := ur.db.GetConn().Find(&usuariosGORM)
 
 	if result.Error != nil {
 		log.Printf("Error al obtener los usuarios: %v", result.Error)
@@ -317,7 +317,7 @@ var jwtKey = []byte("clave_secreta")
 // Estructura del token
 type Claims struct {
 	UserID string `json:"user_id"`
-	Role   string `json:"role"`
+	//Role   string `json:"role"`
 	jwt.StandardClaims
 }
 
