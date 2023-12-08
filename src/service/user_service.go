@@ -32,8 +32,12 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	}
 	fmt.Printf("Usuario creado: %v", u)
 	response := &pb.CreateUserResponse{
-		Id: u.ID,
+		Id:       u.ID,
+		Nombre:   u.Nombre,
+		Apellido: u.Apellido,
+		Correo:   u.Correo,
 	}
+	fmt.Printf("Usuario creado: %v", response)
 	return response, nil
 }
 
@@ -67,4 +71,70 @@ func (s *UserService) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (
 	}
 
 	return &pb.ListUsersResponse{Users: response}, nil
+}
+
+func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
+	nombre := req.GetNombre()
+	apellido := req.GetApellido()
+	correo := req.GetCorreo()
+
+	actualizarUsuarioInput := &model.ActualizarUsuarioInput{
+		Nombre:   &nombre,
+		Apellido: &apellido,
+		Correo:   &correo,
+	}
+	u, err := s.repo.ActualizarUsuario(req.GetId(), actualizarUsuarioInput)
+	if err != nil {
+		return nil, err
+	}
+	response := &pb.UpdateUserResponse{
+		Id:       u.ID,
+		Nombre:   u.Nombre,
+		Apellido: u.Apellido,
+		Correo:   u.Correo,
+	}
+	return response, nil
+}
+
+func (s *UserService) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
+	respuesta, err := s.repo.EliminarUsuario(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	response := &pb.DeleteUserResponse{
+		Mensaje: respuesta.Mensaje,
+	}
+	return response, nil
+}
+
+func (s *UserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	loginInput := model.LoginInput{
+		Correo:     req.GetCorreo(),
+		Contrasena: req.GetContrasena(),
+	}
+	authPayload, err := s.repo.Login(loginInput)
+	if err != nil {
+		return nil, err
+	}
+	response := &pb.LoginResponse{
+		Token: authPayload.Token,
+		User: &pb.User{
+			Id:       authPayload.Usuario.ID,
+			Nombre:   authPayload.Usuario.Nombre,
+			Apellido: authPayload.Usuario.Apellido,
+			Correo:   authPayload.Usuario.Correo,
+		},
+	}
+	return response, nil
+}
+
+func (s *UserService) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutResponse, error) {
+	respuesta, err := s.repo.Logout(req.GetUserID())
+	if err != nil {
+		return nil, err
+	}
+	response := &pb.LogoutResponse{
+		Mensaje: respuesta.Mensaje,
+	}
+	return response, nil
 }

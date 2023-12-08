@@ -25,8 +25,7 @@ type LoginInput struct {
 }
 
 type RespuestaEliminacion struct {
-	Mensaje          string `json:"mensaje"`
-	CodigoEstadoHTTP int    `json:"codigoEstadoHTTP"`
+	Mensaje string `json:"mensaje"`
 }
 
 type Usuario struct {

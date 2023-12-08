@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/ArquitecturaDeSistemas/usermicroservice/database"
@@ -19,13 +18,13 @@ import (
 type UserRepository interface {
 	CrearUsuario(input model.CrearUsuarioInput) (*model.Usuario, error)
 	Usuario(id string) (*model.Usuario, error)
-	// ActualizarUsuario(id string, input *model.ActualizarUsuarioInput) (string, error)
-	// EliminarUsuario(id string) (string, error)
+	ActualizarUsuario(id string, input *model.ActualizarUsuarioInput) (*model.Usuario, error)
+	EliminarUsuario(id string) (*model.RespuestaEliminacion, error)
 	Usuarios() ([]*model.Usuario, error)
-	// ExistePorCorreo(correo string) (bool, error)
-	// Retrieve(correo string, contrasena string) (*model.Usuario, error)
-	// Login(input model.LoginInput) (string, error)
-	// Logout(id string) (string, error)
+	ExistePorCorreo(correo string) (bool, error)
+	Retrieve(correo string, contrasena string) (*model.Usuario, error)
+	Login(input model.LoginInput) (*model.AuthPayload, error)
+	Logout(id string) (model.RespuestaEliminacion, error)
 }
 
 type userRepository struct {
@@ -149,17 +148,17 @@ func (ur *userRepository) CrearUsuario(input model.CrearUsuarioInput) (*model.Us
 	response, err := usuarioGORM.ToGQL()
 	return response, err
 }
-func (ur *userRepository) ActualizarUsuario(id string, input *model.ActualizarUsuarioInput) (string, error) {
+func (ur *userRepository) ActualizarUsuario(id string, input *model.ActualizarUsuarioInput) (*model.Usuario, error) {
 	// Buscar el usuario existente por su ID
 	var usuarioGORM model.UsuarioGORM
 	result := ur.db.GetConn().First(&usuarioGORM, id)
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return "No se pudo actualizar el usuario", fmt.Errorf("Usuario con ID %s no encontrado", id)
+			return nil, fmt.Errorf("Usuario con ID %s no encontrado", id)
 		}
 		log.Printf("Error al buscar el usuario con ID %s: %v", id, result.Error)
-		return "No se pudo actualizar el usuario", result.Error
+		return nil, result.Error
 	}
 
 	// Actualizar los campos proporcionados en el input
@@ -177,16 +176,16 @@ func (ur *userRepository) ActualizarUsuario(id string, input *model.ActualizarUs
 	result = ur.db.GetConn().Save(&usuarioGORM)
 	if result.Error != nil {
 		log.Printf("Error al actualizar el usuario con ID %s: %v", id, result.Error)
-		return "No se puede actualizar el usuario con ID dado", result.Error
+		return nil, result.Error
 	}
 
 	// Devolver el usuario actualizado
-	response, _ := usuarioGORM.ToGQL()
-	return ToJSON(response)
+	// response, _ := usuarioGORM.ToGQL()
+	return usuarioGORM.ToGQL()
 }
 
 // EliminarUsuario elimina un usuario de la base de datos por su ID.
-func (ur *userRepository) EliminarUsuario(id string) (string, error) {
+func (ur *userRepository) EliminarUsuario(id string) (*model.RespuestaEliminacion, error) {
 	// Intenta buscar el usuario por su ID
 	var usuarioGORM model.UsuarioGORM
 	result := ur.db.GetConn().First(&usuarioGORM, id)
@@ -195,19 +194,17 @@ func (ur *userRepository) EliminarUsuario(id string) (string, error) {
 		// Manejo de errores
 		if result.Error == gorm.ErrRecordNotFound {
 			// El usuario no se encontró en la base de datos
-			response, _ := &model.RespuestaEliminacion{
-				Mensaje:          "El usuario no existe",
-				CodigoEstadoHTTP: http.StatusNotFound,
-			}, result.Error
-			return ToJSON(response)
+			response := &model.RespuestaEliminacion{
+				Mensaje: "El usuario no existe",
+			}
+			return response, result.Error
 
 		}
 		log.Printf("Error al buscar el usuario con ID %s: %v", id, result.Error)
-		response, _ := &model.RespuestaEliminacion{
-			Mensaje:          "Error al buscar el usuario",
-			CodigoEstadoHTTP: http.StatusInternalServerError,
-		}, result.Error
-		return ToJSON(response)
+		response := &model.RespuestaEliminacion{
+			Mensaje: "Error al buscar el usuario",
+		}
+		return response, result.Error
 	}
 
 	// Elimina el usuario de la base de datos
@@ -215,49 +212,47 @@ func (ur *userRepository) EliminarUsuario(id string) (string, error) {
 
 	if result.Error != nil {
 		log.Printf("Error al eliminar el usuario con ID %s: %v", id, result.Error)
-		response, _ := &model.RespuestaEliminacion{
-			Mensaje:          "Error al eliminar el usuario",
-			CodigoEstadoHTTP: http.StatusInternalServerError,
-		}, result.Error
-		return ToJSON(response)
+		response := &model.RespuestaEliminacion{
+			Mensaje: "Error al eliminar el usuario",
+		}
+		return response, result.Error
 	}
 
 	// Éxito al eliminar el usuario
-	response, _ := &model.RespuestaEliminacion{
-		Mensaje:          "Usuario eliminado con éxito",
-		CodigoEstadoHTTP: http.StatusOK,
-	}, result.Error
-	return ToJSON(response)
+	response := &model.RespuestaEliminacion{
+		Mensaje: "Usuario eliminado con éxito",
+	}
+	return response, result.Error
 
 }
 
-func (ur *userRepository) Login(input model.LoginInput) (string, error) {
+func (ur *userRepository) Login(input model.LoginInput) (*model.AuthPayload, error) {
 	// Verificar las credenciales del usuario (correo y contraseña)
 	if input.Correo == "" || input.Contrasena == "" {
-		return "", errors.New("Correo y contraseña son requeridos")
+		return nil, errors.New("Correo y contraseña son requeridos")
 	}
 	if len(input.Contrasena) < 6 || len(input.Contrasena) > 50 {
-		return "", errors.New("La contraseña debe tener al menos 6 caracteres")
+		return nil, errors.New("La contraseña debe tener al menos 6 caracteres")
 	}
 	if len(input.Correo) < 3 || len(input.Correo) > 50 {
-		return "", errors.New("El correo debe tener al menos 3 caracteres")
+		return nil, errors.New("El correo debe tener al menos 3 caracteres")
 	}
 
 	usuario, err := ur.Retrieve(input.Correo, input.Contrasena)
 	if err != nil {
 		fmt.Printf("Error al verificar las credenciales: %v", err)
-		return "", errors.New("Credenciales inválidas")
+		return nil, errors.New("Credenciales inválidas")
 	}
 
 	// Comprueba si el usuario ya tiene una sesión activa (esto podría ser a través de una base de datos)
 	if ur.isSessionActive(usuario.ID) {
-		return "", errors.New("Ya existe una sesión activa")
+		return nil, errors.New("Ya existe una sesión activa")
 	}
 	// Generar un token de autenticación para el usuario
 	token, err := CreateToken(usuario)
 	if err != nil {
 		fmt.Printf("Error al generar el token de autenticación: %v", err)
-		return "", fmt.Errorf("Error al generar el token: %v", err)
+		return nil, fmt.Errorf("Error al generar el token: %v", err)
 	}
 
 	ur.registerSession(usuario.ID, token)
@@ -268,46 +263,28 @@ func (ur *userRepository) Login(input model.LoginInput) (string, error) {
 		Usuario: usuario,
 	}
 	log.Printf("Usuario autenticado: %v", usuario.ID)
-	return ToJSON(authPayload)
+	return authPayload, nil
 
 }
 
-// func (ur *userRepository) Logout(userID string) (string, error) {
-
-// 	if userID == "" {
-// 		return "false", errors.New("El ID de usuario es requerido")
-// 	}
-
-// 	// Verifica si la sesión del usuario existe
-// 	if !ur.isSessionActive(userID) {
-// 		return "false", errors.New("No hay una sesión activa para este usuario")
-// 	}
-
-// 	// Elimina la sesión del usuario
-// 	delete(activeSessions, userID)
-
-// 	log.Printf("Sesión cerrada para el usuario: %v", userID)
-// 	return "true", nil
-// }
-
-func (ur *userRepository) Logout(userID string) (string, error) {
+func (ur *userRepository) Logout(userID string) (model.RespuestaEliminacion, error) {
 	var respuesta model.RespuestaEliminacion
 	if userID == "" {
-		var re, _ = ToJSON(respuesta)
-		return re, errors.New("El ID de usuario es requerido")
+		return model.RespuestaEliminacion{
+			Mensaje: "El ID de usuario es requerido",
+		}, errors.New("El ID de usuario es requerido")
 	}
 	if !ur.isSessionActive(userID) {
-		var re, _ = ToJSON(respuesta)
-		return re, errors.New("No hay una sesión activa para este usuario")
+		return model.RespuestaEliminacion{
+			Mensaje: "No hay una sesión activa para este usuario",
+		}, errors.New("No hay una sesión activa para este usuario")
 	}
 	delete(activeSessions, userID)
 	log.Printf("Sesión cerrada para el usuario: %v", userID)
 	respuesta = model.RespuestaEliminacion{
-		Mensaje:          "Sesión cerrada exitosamente",
-		CodigoEstadoHTTP: 200, // Código HTTP para éxito
+		Mensaje: "Sesión cerrada exitosamente",
 	}
-	var re, _ = ToJSON(respuesta)
-	return re, nil
+	return respuesta, nil
 }
 
 // Clave secreta que no se expone! es una clvve

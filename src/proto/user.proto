@@ -10,6 +10,8 @@ service UserService {
   rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
   rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
   rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
+  rpc LoginUser (LoginRequest) returns (LoginResponse);
+  rpc LogoutUser (LogoutRequest) returns (LogoutResponse);
 }
 
 message CreateUserRequest {
@@ -21,6 +23,9 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   string id = 1;
+  string nombre = 2;
+  string apellido = 3;
+  string correo = 4;
 }
 
 message GetUserRequest {
@@ -68,4 +73,23 @@ message User{
   string nombre = 2;
   string apellido = 3;
   string correo = 4;
+}
+
+
+message LoginRequest{
+  string correo = 1;
+  string contrasena = 2;
+}
+
+message LoginResponse{
+  string token = 1;
+  User user = 2;
+}
+
+message LogoutRequest{
+  string userID = 1;
+}
+
+message LogoutResponse{
+  string mensaje = 1;
 }
