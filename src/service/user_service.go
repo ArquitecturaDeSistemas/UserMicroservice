@@ -77,16 +77,18 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 	nombre := req.GetNombre()
 	apellido := req.GetApellido()
 	correo := req.GetCorreo()
-
+	fmt.Printf("Nombre: %v", nombre)
 	actualizarUsuarioInput := &model.ActualizarUsuarioInput{
 		Nombre:   &nombre,
 		Apellido: &apellido,
 		Correo:   &correo,
 	}
+	fmt.Printf("Usuario actualizado input: %v", actualizarUsuarioInput)
 	u, err := s.repo.ActualizarUsuario(req.GetId(), actualizarUsuarioInput)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Usuario actualizado: %v", u)
 	response := &pb.UpdateUserResponse{
 		Id:       u.ID,
 		Nombre:   u.Nombre,

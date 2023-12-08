@@ -148,8 +148,43 @@ func (ur *userRepository) CrearUsuario(input model.CrearUsuarioInput) (*model.Us
 	response, err := usuarioGORM.ToGQL()
 	return response, err
 }
+
+// func (ur *userRepository) ActualizarUsuario(id string, input *model.ActualizarUsuarioInput) (*model.Usuario, error) {
+// 	// Buscar el usuario existente por su ID
+// 	var usuarioGORM model.UsuarioGORM
+// 	result := ur.db.GetConn().First(&usuarioGORM, id)
+
+// 	if result.Error != nil {
+// 		if result.Error == gorm.ErrRecordNotFound {
+// 			return nil, fmt.Errorf("Usuario con ID %s no encontrado", id)
+// 		}
+// 		log.Printf("Error al buscar el usuario con ID %s: %v", id, result.Error)
+// 		return nil, result.Error
+// 	}
+
+// 	// Actualizar los campos proporcionados en el input
+// 	if input.Nombre != nil {
+// 		usuarioGORM.Nombre = *input.Nombre
+// 	}
+// 	if input.Apellido != nil {
+// 		usuarioGORM.Apellido = *input.Apellido
+// 	}
+// 	if input.Correo != nil {
+// 		usuarioGORM.Correo = *input.Correo
+// 	}
+
+// 	// Actualizar el registro en la base de datos
+// 	result = ur.db.GetConn().Save(&usuarioGORM)
+// 	if result.Error != nil {
+// 		log.Printf("Error al actualizar el usuario con ID %s: %v", id, result.Error)
+// 		return nil, result.Error
+// 	}
+
+//		// Devolver el usuario actualizado
+//		// response, _ := usuarioGORM.ToGQL()
+//		return usuarioGORM.ToGQL()
+//	}
 func (ur *userRepository) ActualizarUsuario(id string, input *model.ActualizarUsuarioInput) (*model.Usuario, error) {
-	// Buscar el usuario existente por su ID
 	var usuarioGORM model.UsuarioGORM
 	result := ur.db.GetConn().First(&usuarioGORM, id)
 
@@ -157,11 +192,10 @@ func (ur *userRepository) ActualizarUsuario(id string, input *model.ActualizarUs
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("Usuario con ID %s no encontrado", id)
 		}
-		log.Printf("Error al buscar el usuario con ID %s: %v", id, result.Error)
 		return nil, result.Error
 	}
 
-	// Actualizar los campos proporcionados en el input
+	// Solo actualiza los campos proporcionados
 	if input.Nombre != nil {
 		usuarioGORM.Nombre = *input.Nombre
 	}
@@ -172,15 +206,11 @@ func (ur *userRepository) ActualizarUsuario(id string, input *model.ActualizarUs
 		usuarioGORM.Correo = *input.Correo
 	}
 
-	// Actualizar el registro en la base de datos
 	result = ur.db.GetConn().Save(&usuarioGORM)
 	if result.Error != nil {
-		log.Printf("Error al actualizar el usuario con ID %s: %v", id, result.Error)
 		return nil, result.Error
 	}
-
-	// Devolver el usuario actualizado
-	// response, _ := usuarioGORM.ToGQL()
+	fmt.Printf("Usuario actualizado: %v", usuarioGORM)
 	return usuarioGORM.ToGQL()
 }
 
