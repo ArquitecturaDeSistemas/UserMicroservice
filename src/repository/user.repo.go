@@ -85,6 +85,10 @@ func (ur *userRepository) Retrieve(correo string, contrasena string) (*model.Usu
 
 // ObtenerTrabajo obtiene un trabajo por su ID.
 func (ur *userRepository) Usuario(id string) (*model.Usuario, error) {
+	if id == "" {
+		return nil, errors.New("El ID de usuario es requerido")
+	}
+
 	var usuarioGORM model.UsuarioGORM
 	//result := ur.db.GetConn().First(&usuarioGORM, id)
 	result := ur.db.GetConn().First(&usuarioGORM, id)
@@ -186,6 +190,10 @@ func (ur *userRepository) CrearUsuario(input model.CrearUsuarioInput) (*model.Us
 //	}
 func (ur *userRepository) ActualizarUsuario(id string, input *model.ActualizarUsuarioInput) (*model.Usuario, error) {
 	var usuarioGORM model.UsuarioGORM
+	if id == "" {
+		return nil, errors.New("El ID de usuario es requerido")
+	}
+
 	result := ur.db.GetConn().First(&usuarioGORM, id)
 
 	if result.Error != nil {
@@ -261,12 +269,12 @@ func (ur *userRepository) Login(input model.LoginInput) (*model.AuthPayload, err
 	if input.Correo == "" || input.Contrasena == "" {
 		return nil, errors.New("Correo y contraseña son requeridos")
 	}
-	if len(input.Contrasena) < 6 || len(input.Contrasena) > 50 {
-		return nil, errors.New("La contraseña debe tener al menos 6 caracteres")
-	}
-	if len(input.Correo) < 3 || len(input.Correo) > 50 {
-		return nil, errors.New("El correo debe tener al menos 3 caracteres")
-	}
+	// if len(input.Contrasena) < 6 || len(input.Contrasena) > 50 {
+	// 	return nil, errors.New("La contraseña debe tener al menos 6 caracteres")
+	// }
+	// if len(input.Correo) < 3 || len(input.Correo) > 50 {
+	// 	return nil, errors.New("El correo debe tener al menos 3 caracteres")
+	// }
 
 	usuario, err := ur.Retrieve(input.Correo, input.Contrasena)
 	if err != nil {

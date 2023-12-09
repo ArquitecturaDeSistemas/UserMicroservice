@@ -9,6 +9,8 @@ import (
 	"github.com/ArquitecturaDeSistemas/usermicroservice/repository"
 )
 
+// este servicio implementa la interfaz UserServiceServer
+// que se genera a partir del archivo proto
 type UserService struct {
 	pb.UnimplementedUserServiceServer
 	repo repository.UserRepository
@@ -54,6 +56,7 @@ func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.
 	}
 	return response, nil
 }
+
 func (s *UserService) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*pb.ListUsersResponse, error) {
 	users, err := s.repo.Usuarios()
 	if err != nil {
@@ -109,7 +112,7 @@ func (s *UserService) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest)
 	return response, nil
 }
 
-func (s *UserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (s *UserService) LoginUser(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	loginInput := model.LoginInput{
 		Correo:     req.GetCorreo(),
 		Contrasena: req.GetContrasena(),
@@ -130,7 +133,7 @@ func (s *UserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 	return response, nil
 }
 
-func (s *UserService) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutResponse, error) {
+func (s *UserService) LogoutUser(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutResponse, error) {
 	respuesta, err := s.repo.Logout(req.GetUserID())
 	if err != nil {
 		return nil, err
