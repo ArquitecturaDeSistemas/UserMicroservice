@@ -1,4 +1,4 @@
-package model
+package dominio
 
 type ActualizarUsuarioInput struct {
 	Nombre     *string `json:"nombre,omitempty"`

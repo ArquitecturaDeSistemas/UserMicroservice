@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ArquitecturaDeSistemas/usermicroservice/model"
+	model "github.com/ArquitecturaDeSistemas/usermicroservice/dominio"
+	repository "github.com/ArquitecturaDeSistemas/usermicroservice/ports"
 	pb "github.com/ArquitecturaDeSistemas/usermicroservice/proto"
-	"github.com/ArquitecturaDeSistemas/usermicroservice/repository"
 )
 
 // este servicio implementa la interfaz UserServiceServer

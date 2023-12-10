@@ -3,7 +3,7 @@ package database
 import (
 	"log"
 
-	"github.com/ArquitecturaDeSistemas/usermicroservice/model"
+	model "github.com/ArquitecturaDeSistemas/usermicroservice/dominio"
 	"gorm.io/gorm"
 )
 

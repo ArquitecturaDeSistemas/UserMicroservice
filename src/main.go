@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
+	repository "github.com/ArquitecturaDeSistemas/usermicroservice/adapters"
+	service "github.com/ArquitecturaDeSistemas/usermicroservice/aplicacion"
 	"github.com/ArquitecturaDeSistemas/usermicroservice/database"
 	pb "github.com/ArquitecturaDeSistemas/usermicroservice/proto"
-	"github.com/ArquitecturaDeSistemas/usermicroservice/repository"
-	"github.com/ArquitecturaDeSistemas/usermicroservice/service"
 	"google.golang.org/grpc"
 )
 

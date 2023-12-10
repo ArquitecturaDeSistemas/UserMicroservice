@@ -1,4 +1,4 @@
-package repository
+package adapters
 
 import (
 	"encoding/json"
@@ -8,31 +8,25 @@ import (
 	"time"
 
 	"github.com/ArquitecturaDeSistemas/usermicroservice/database"
-	"github.com/ArquitecturaDeSistemas/usermicroservice/model"
+	model "github.com/ArquitecturaDeSistemas/usermicroservice/dominio"
+	"github.com/ArquitecturaDeSistemas/usermicroservice/ports"
 	"github.com/dgrijalva/jwt-go"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-type UserRepository interface {
-	CrearUsuario(input model.CrearUsuarioInput) (*model.Usuario, error)
-	Usuario(id string) (*model.Usuario, error)
-	ActualizarUsuario(id string, input *model.ActualizarUsuarioInput) (*model.Usuario, error)
-	EliminarUsuario(id string) (*model.RespuestaEliminacion, error)
-	Usuarios() ([]*model.Usuario, error)
-	ExistePorCorreo(correo string) (bool, error)
-	Retrieve(correo string, contrasena string) (*model.Usuario, error)
-	Login(input model.LoginInput) (*model.AuthPayload, error)
-	Logout(id string) (model.RespuestaEliminacion, error)
-}
+/**
+* Es un adaptador de salida
+
+ */
 
 type userRepository struct {
 	db             *database.DB
 	activeSessions map[string]string
 }
 
-func NewUserRepository(db *database.DB) UserRepository {
+func NewUserRepository(db *database.DB) ports.UserRepository {
 	return &userRepository{
 		db:             db,
 		activeSessions: make(map[string]string),

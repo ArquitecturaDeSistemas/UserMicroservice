@@ -1,4 +1,4 @@
-package model
+package dominio
 
 import (
 	"strconv"

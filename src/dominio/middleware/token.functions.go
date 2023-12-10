@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ArquitecturaDeSistemas/usermicroservice/model"
+	model "github.com/ArquitecturaDeSistemas/usermicroservice/dominio"
 	"github.com/dgrijalva/jwt-go"
 )
 
