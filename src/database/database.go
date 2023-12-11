@@ -31,7 +31,7 @@ func Connect() *DB {
 	fmt.Printf("DB_NAME: %s\n", dbname)
 
 	// dsn := "root:mysql@tcp(172.16.238.10:3306)/db_users?parseTime=true"
-	dsn := "root:mysql@tcp(localhost:3306)/db_users_arq?parseTime=true"
+	dsn := "user:password@tcp(localhost:3306)/db_users_arq?parseTime=true"
 	conn, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Error al conectar a la base de datos MySQL: %v", err)
